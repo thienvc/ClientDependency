@@ -20,7 +20,8 @@ namespace ClientDependency.SASS
     {
         private static readonly ISassCompiler Compiler = new SassCompiler();
 
-        public bool WriteToStream(BaseCompositeFileProcessingProvider provider, StreamWriter sw, FileInfo fi, ClientDependencyType type, string origUrl, HttpContextBase http)
+        public bool WriteToStream(BaseCompositeFileProcessingProvider provider, StreamWriter sw, FileInfo fi,
+            ClientDependencyType type, string origUrl, HttpContextBase http, IEnumerable<string> allowedDomains)
         {
             try
             {
@@ -30,7 +31,7 @@ namespace ClientDependency.SASS
                 //NOTE: We don't want this compressed since CDF will do that ourselves
                 var output = Compiler.Compile(fi.FullName, false, accessedFiles);
                 
-                DefaultFileWriter.WriteContentToStream(provider, sw, output, type, http, origUrl);
+                DefaultFileWriter.WriteContentToStream(provider, sw, output, type, http, origUrl, allowedDomains);
 
                 return true;
             }

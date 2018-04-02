@@ -14,6 +14,7 @@ namespace ClientDependency.Core.CompositeFiles
 
         private readonly static object Lock = new object();
 
+        private static DnnConfiguration dnnConfig = new DnnConfiguration();
         /// <summary>
         /// When building composite includes, it creates a Base64 encoded string of all of the combined dependency file paths
         /// for a given composite group. If this group contains too many files, then the file path with the query string will be very long.
@@ -52,7 +53,8 @@ namespace ClientDependency.Core.CompositeFiles
 
                 // querystring format
                 fileKey = queryStrings["s"];
-                if (!string.IsNullOrEmpty(queryStrings["cdv"]) && !Int32.TryParse(queryStrings["cdv"], out version))
+                var clientDepdendencyVersion = queryStrings["cdv"].TrimEnd('/');
+                if (!string.IsNullOrEmpty(clientDepdendencyVersion) && !Int32.TryParse(clientDepdendencyVersion, out version))
                     throw new ArgumentException("Could not parse the version in the request");
                 try
                 {
@@ -72,7 +74,12 @@ namespace ClientDependency.Core.CompositeFiles
                 //parse using the parser
                 if (!PathBasedUrlFormatter.Parse(pathFormat, path, out fileKey, out type, out version))
                 {
-                    throw new FormatException("Could not parse the URL path: " + path + " with the format specified: " + pathFormat);
+                    if (context.IsDebuggingEnabled || dnnConfig.IsDebugMode())
+                    {
+                        throw new FormatException("Could not parse the URL path: " + path + " with the format specified: " + pathFormat);
+                    }
+
+                    throw new HttpException(404, "Path not found");
                 }
             }
 
@@ -167,8 +174,13 @@ namespace ClientDependency.Core.CompositeFiles
 
                             if (filePaths == null)
                             {
-                                throw new KeyNotFoundException("no map was found for the dependency key: " + fileset +
+                                if (context.IsDebuggingEnabled || dnnConfig.IsDebugMode())
+                                {
+                                    throw new KeyNotFoundException("no map was found for the dependency key: " + fileset +
                                                                " ,CompositeUrlType.MappedId requires that a map is found");
+                                }
+
+                                throw new HttpException(404, "Path not found");
                             }
 
                             var filePathArray = filePaths.ToArray();

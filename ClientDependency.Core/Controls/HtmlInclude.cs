@@ -16,6 +16,9 @@ namespace ClientDependency.Core.Controls
 
         private const string MatchAllAttributes = "(\\S+)=[\"']?((?:.(?![\"']?\\s+(?:\\S+)=|[>\"']))+.)[\"']?";
 
+        private static readonly Regex LinkTagRegex = new Regex(string.Format(TagPattern, "link"), RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+        private static readonly Regex ScriptTagRegex = new Regex(string.Format(TagPattern, "script"), RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+
         public string ForceProvider { get; set; }
         public int Priority { get; set; }
         public int Group { get; set; }
@@ -55,27 +58,26 @@ namespace ClientDependency.Core.Controls
 
         internal IEnumerable<BasicFile> GetIncludes(string innerHtml, ClientDependencyType dependencyType)
         {
-            string tag, sourceAttribute, mime;
+            Regex tagRegex;
+            string sourceAttribute, mime;
             if (dependencyType == ClientDependencyType.Css)
             {
-                tag = "link";
+                tagRegex = LinkTagRegex;
                 sourceAttribute = "href";
                 mime = "text/css";
             }
             else
             {
-                tag = "script";
+                tagRegex = ScriptTagRegex;
                 sourceAttribute = "src";
                 mime = "text/javascript";
             }
 
-            var tagPattern = string.Format(TagPattern, tag);
-
             var files = new List<BasicFile>();
-            foreach (Match match in Regex.Matches(innerHtml, tagPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.CultureInvariant))
+            foreach (Match match in tagRegex.Matches(innerHtml))
             {
                 var allAttributes = Regex.Matches(match.Value, MatchAllAttributes,
-                                                  RegexOptions.Compiled | RegexOptions.IgnoreCase |
+                                                  RegexOptions.IgnoreCase |
                                                   RegexOptions.CultureInvariant)
                                          .Cast<Match>()
                                          .ToArray();

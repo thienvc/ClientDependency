@@ -22,9 +22,6 @@ namespace ClientDependency.Core.CompositeFiles.Providers
         /// </summary>
         public static CompositeUrlType UrlTypeDefault = CompositeUrlType.MappedId;
 
-        /// <summary>
-        /// The path specified in the config
-        /// </summary>
         internal string CompositeFilePathAsString;
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Web;
@@ -17,7 +18,8 @@ namespace ClientDependency.Coffee
     /// </summary>
     public sealed class CoffeeWriter : IFileWriter
     {
-        public bool WriteToStream(BaseCompositeFileProcessingProvider provider, StreamWriter sw, FileInfo fi, ClientDependencyType type, string origUrl, HttpContextBase http)
+        public bool WriteToStream(BaseCompositeFileProcessingProvider provider, StreamWriter sw, FileInfo fi,
+            ClientDependencyType type, string origUrl, HttpContextBase http, IEnumerable<string> allowedDomains)
         {
             try
             {
@@ -26,7 +28,7 @@ namespace ClientDependency.Coffee
 
                 var output = GetOutput(fileContents);
 
-                DefaultFileWriter.WriteContentToStream(provider, sw, output, type, http, origUrl);
+                DefaultFileWriter.WriteContentToStream(provider, sw, output, type, http, origUrl, allowedDomains);
                 
                 return true;
             }

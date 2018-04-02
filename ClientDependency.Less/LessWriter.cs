@@ -24,7 +24,8 @@ namespace ClientDependency.Less
     {
 
         [SecuritySafeCritical]
-        public bool WriteToStream(BaseCompositeFileProcessingProvider provider, StreamWriter sw, FileInfo fi, ClientDependencyType type, string origUrl, HttpContextBase http)
+        public bool WriteToStream(BaseCompositeFileProcessingProvider provider, StreamWriter sw, FileInfo fi,
+            ClientDependencyType type, string origUrl, HttpContextBase http, IEnumerable<string> allowedDomains)
         {
             try
             {
@@ -46,7 +47,7 @@ namespace ClientDependency.Less
 
                 var output = lessEngine.TransformToCss(fileContents, origUrl);
 
-                DefaultFileWriter.WriteContentToStream(provider, sw, output, type, http, origUrl);
+                DefaultFileWriter.WriteContentToStream(provider, sw, output, type, http, origUrl, allowedDomains);
                 
                 return true;
             }

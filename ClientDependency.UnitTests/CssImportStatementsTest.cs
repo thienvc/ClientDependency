@@ -31,7 +31,7 @@ src:local('Open Sans'),
 
                 string externalImports;
                 IEnumerable<string> importPaths;
-                CssHelper.ParseImportStatements(ms, out importPaths, out externalImports);
+                CssHelper.ParseImportStatements(ms, out importPaths);
                 
                 Assert.AreEqual("", externalImports);
             }            
@@ -63,7 +63,7 @@ src:local('Open Sans'),
 
                 string externalImports;
                 IEnumerable<string> importPaths;
-                var position = CssHelper.ParseImportStatements(ms, out importPaths, out externalImports);
+                var position = CssHelper.ParseImportStatements(ms, out importPaths);
 
                 Assert.AreEqual(ms.Length, position);
                 Assert.AreEqual(cssWithImport, externalImports);
@@ -148,7 +148,7 @@ td.visible-xs {
 
                 IEnumerable<string> importPaths;
                 string externalImports;
-                var position = CssHelper.ParseImportStatements(ms, out importPaths, out externalImports);
+                var position = CssHelper.ParseImportStatements(ms, out importPaths);
 
                 Assert.AreEqual(string.Empty, externalImports);
 
@@ -182,7 +182,7 @@ div {display: block;}";
 
                 IEnumerable<string> importPaths;
                 string externalImports;
-                var position = CssHelper.ParseImportStatements(ms, out importPaths, out externalImports);
+                var position = CssHelper.ParseImportStatements(ms, out importPaths);
 
                 Assert.AreEqual(@"@import url('http://mysite/css/color.css');", externalImports);
 

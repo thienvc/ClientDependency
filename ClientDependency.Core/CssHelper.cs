@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using ClientDependency.Core.CompositeFiles;
+using ClientDependency.Core.Config;
 
 namespace ClientDependency.Core
 {
@@ -29,12 +31,23 @@ namespace ClientDependency.Core
                 var urlMatch = CssUrlRegex.Match(match.Value);
                 if (urlMatch.Success && urlMatch.Groups.Count >= 2)
                 {
-                    var path = urlMatch.Groups[1].Value.Trim('\'', '"'); 
+                    var path = urlMatch.Groups[1].Value.Trim('\'', '"');
                     if ((path.StartsWith("http://", StringComparison.InvariantCultureIgnoreCase)
                          || path.StartsWith("https://", StringComparison.InvariantCultureIgnoreCase)
                          || path.StartsWith("//", StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        continue;
+                        Uri uri;
+                        if (!IsAbsoluteUrl(path, out uri))
+                        {
+                            continue;
+                        }
+                        var domain = $".{uri.Host}:{uri.Port}";
+                        var approvedDomains =
+                            ClientDependencySettings.Instance.DefaultCompositeFileProcessingProvider.BundleDomains;
+                        if (!approvedDomains.Any(bundleDomain => domain.EndsWith(bundleDomain)))
+                        {
+                            continue;
+                        }
                     }
                 }
 
@@ -211,6 +224,11 @@ namespace ClientDependency.Core
                 stream.Position = 0;
             }
             return cssMinify.Minify(new StreamReader(stream));
+        }
+
+        private static bool IsAbsoluteUrl(string url, out Uri uri)
+        {
+            return Uri.TryCreate(url, UriKind.Absolute, out uri);
         }
     }
 }

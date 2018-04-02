@@ -191,7 +191,12 @@ namespace ClientDependency.Core.Config
                 {
                     _version = ConfigSection.Version;
                 }
-                return _version.Value;
+
+                //grab any settings from dnn
+                var dnnConfig = new DnnConfiguration();
+                var dnnVersion = dnnConfig.GetVersion();
+
+                return dnnVersion == null ? _version.Value : dnnVersion.Value;
             }
             set { _version = value; }
         }

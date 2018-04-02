@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,8 @@ namespace ClientDependency.TypeScript
 {
     public sealed class TypeScriptWriter : IFileWriter
     {
-        public bool WriteToStream(BaseCompositeFileProcessingProvider provider, StreamWriter sw, FileInfo fi, ClientDependencyType type, string origUrl, HttpContextBase http)
+        public bool WriteToStream(BaseCompositeFileProcessingProvider provider, StreamWriter sw, FileInfo fi,
+            ClientDependencyType type, string origUrl, HttpContextBase http, IEnumerable<string> allowedDomains)
         {
             //if it is a file based dependency then read it				
             var fileContents = File.ReadAllText(fi.FullName, Encoding.UTF8); //read as utf 8
@@ -24,7 +26,7 @@ namespace ClientDependency.TypeScript
             try
             {
                 var output = CompileTypeScript(engine, fileContents);
-                DefaultFileWriter.WriteContentToStream(provider, sw, output, type, http, origUrl);
+                DefaultFileWriter.WriteContentToStream(provider, sw, output, type, http, origUrl, allowedDomains);
                 return true;
             }
             catch (System.Exception ex)
