@@ -39,7 +39,7 @@ $SolutionInfoPath = Join-Path -Path $SolutionRoot -ChildPath "SolutionInfo.cs"
 	sc -Path $SolutionInfoPath -Encoding UTF8
 	
 # Build the solution in release mode (in both 4.0 and 4.5 and for MVC5)
-$SolutionPath = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.sln"
+$SolutionPath = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.dnn.sln"
 
 # clean sln for all deploys
 & $MSBuild "$SolutionPath" /p:Configuration=Release /maxcpucount /t:Clean
@@ -115,29 +115,29 @@ $MvcFolderNet40 = Join-Path -Path $MvcFolder -ChildPath "net40";
 $MvcFolderNet45 = Join-Path -Path $MvcFolder -ChildPath "net45";
 New-Item $MvcFolderNet40 -Type directory
 New-Item $MvcFolderNet45 -Type directory
-Copy-Item "$MvcBinFolderNet40\*.*" -Destination $MvcFolderNet40 -Include $include
-Copy-Item "$MvcBinFolderNet45\*.*" -Destination $MvcFolderNet45 -Include $include
+#Copy-Item "$MvcBinFolderNet40\*.*" -Destination $MvcFolderNet40 -Include $include
+#Copy-Item "$MvcBinFolderNet45\*.*" -Destination $MvcFolderNet45 -Include $include
 #need to build mvc5 separately
 $Mvc5BinFolderNet45 = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.Mvc\bin\Release-MVC5";
 $Mvc5FolderNet45 = Join-Path -Path $Mvc5Folder -ChildPath "net45";
 New-Item $Mvc5FolderNet45 -Type directory
-Copy-Item "$Mvc5BinFolderNet45\*.*" -Destination $Mvc5FolderNet45 -Include $include
+#Copy-Item "$Mvc5BinFolderNet45\*.*" -Destination $Mvc5FolderNet45 -Include $include
 
 $include = @('ClientDependency.Less.dll','ClientDependency.Less.pdb')
 $LessBinFolder = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.Less\bin\Release";
-Copy-Item "$LessBinFolder\*.*" -Destination $LessFolder -Include $include
+#Copy-Item "$LessBinFolder\*.*" -Destination $LessFolder -Include $include
 
 $include = @('ClientDependency.SASS.dll','ClientDependency.SASS.pdb')
 $SassBinFolder = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.SASS\bin\Release";
-Copy-Item "$SassBinFolder\*.*" -Destination $SassFolder -Include $include
+#Copy-Item "$SassBinFolder\*.*" -Destination $SassFolder -Include $include
 
 $include = @('ClientDependency.Coffee.dll','ClientDependency.Coffee.pdb')
 $CoffeeBinFolder = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.Coffee\bin\Release";
-Copy-Item "$CoffeeBinFolder\*.*" -Destination $CoffeeFolder -Include $include
+#Copy-Item "$CoffeeBinFolder\*.*" -Destination $CoffeeFolder -Include $include
 
 $include = @('ClientDependency.TypeScript.dll','ClientDependency.TypeScript.pdb')
 $TypeScriptBinFolder = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.TypeScript\bin\Release";
-Copy-Item "$TypeScriptBinFolder\*.*" -Destination $TypeScriptFolder -Include $include
+#Copy-Item "$TypeScriptBinFolder\*.*" -Destination $TypeScriptFolder -Include $include
 
 # COPY THE TRANSFORMS OVER
 Copy-Item "$BuildFolder\nuget-transforms\Core\web.config.*" -Destination (New-Item (Join-Path -Path $CoreFolder -ChildPath "nuget-transforms") -Type directory);
