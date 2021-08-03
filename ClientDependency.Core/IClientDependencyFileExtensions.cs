@@ -44,7 +44,7 @@ namespace ClientDependency.Core
             }
 
             var uri = new Uri(new Uri("https://example.com"), filePath);
-            return uri.PathAndQuery;
+            return HttpUtility.UrlDecode(uri.PathAndQuery);
         }
     }
 }

@@ -135,16 +135,16 @@ namespace ClientDependency.Core.CompositeFiles.Providers
             CompositeFileDefinition def = null;
             if (!string.IsNullOrEmpty(path))
             {
+                //all config based extensions and all extensions registered by file writers
+                var fileBasedExtensions = ClientDependencySettings.Instance.FileBasedDependencyExtensionList
+                    .Union(FileWriters.GetRegisteredExtensions())
+                    .ToList();
+
                 try
                 {
                     //var fi = new FileInfo(context.Server.MapPath(path));
 
                     var extension = Path.GetExtension(path);
-
-                    //all config based extensions and all extensions registered by file writers
-                    var fileBasedExtensions = ClientDependencySettings.Instance.FileBasedDependencyExtensionList
-                                                                      .Union(FileWriters.GetRegisteredExtensions());
-
                     if (fileBasedExtensions.Contains(extension.ToUpper()))
                     {
                         IVirtualFileWriter virtualWriter;
@@ -188,16 +188,20 @@ namespace ClientDependency.Core.CompositeFiles.Providers
                         if (Uri.TryCreate(path, UriKind.RelativeOrAbsolute, out uri) && uri.IsLocalUri(context))
                         {
                             var localPath = uri.PathAndQuery;
-                            var fi = new FileInfo(context.Server.MapPath(localPath));
-                            if (fi.Exists)
+                            var extension = Path.GetExtension(localPath);
+                            if (fileBasedExtensions.Contains(extension.ToUpper()))
                             {
-                                try
+                                var fi = new FileInfo(context.Server.MapPath(localPath));
+                                if (fi.Exists)
                                 {
-                                    WriteFileToStream(sw, fi, type, path, context); //internal request
-                                }
-                                catch (Exception ex1)
-                                {
-                                    ClientDependencySettings.Instance.Logger.Error($"Could not load file contents from {path}. EXCEPTION: {ex1.Message}", ex1);
+                                    try
+                                    {
+                                        WriteFileToStream(sw, fi, type, path, context); //internal request
+                                    }
+                                    catch (Exception ex1)
+                                    {
+                                        ClientDependencySettings.Instance.Logger.Error($"Could not load file contents from {path}. EXCEPTION: {ex1.Message}", ex1);
+                                    }
                                 }
                             }
                         }
