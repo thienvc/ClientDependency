@@ -89,9 +89,14 @@ namespace ClientDependency.Core
         /// <returns></returns>
         public static string GenerateHash(this string str)
         {
+#if !Net35
             return CryptoConfig.AllowOnlyFipsAlgorithms
                 ? str.GenerateSha1Hash()
                 : str.GenerateMd5();
+#else
+            return str.GenerateMd5();
+#endif
+
         }
 
         /// <summary>
@@ -168,5 +173,22 @@ namespace ClientDependency.Core
             return isExt;
         }
 
+        internal static string EnsureStartsWith(this string input, string toStartWith)
+        {
+            if (input.StartsWith(toStartWith)) return input;
+            return toStartWith + input.TrimStart(toStartWith);
+        }
+
+        internal static string TrimStart(this string value, string forRemoving)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+            if (string.IsNullOrEmpty(forRemoving)) return value;
+
+            while (value.StartsWith(forRemoving, StringComparison.InvariantCultureIgnoreCase))
+            {
+                value = value.Substring(forRemoving.Length);
+            }
+            return value;
+        }
     }
 }

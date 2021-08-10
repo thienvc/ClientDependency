@@ -76,13 +76,20 @@ namespace ClientDependency.Core.CompositeFiles.Providers
             {
                 var fDefs = filePaths.Select(s => WritePathToStream(type, s, context, sw)).Where(def => def != null).ToList();
 
-                sw.Flush();
-                byte[] outputBytes = ms.ToArray();
-                sw.Close();
-                ms.Close();
                 fileDefs = fDefs;
-                return outputBytes;
-            }
+
+                if (fDefs.Count == 0)
+                {
+                    return null;
+                }
+
+	        sw.Flush();
+			byte[] outputBytes = ms.ToArray();
+			sw.Close();
+			ms.Close();
+                
+			return outputBytes;
+		}
         }
 
 		/// <summary>

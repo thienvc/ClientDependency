@@ -15,6 +15,7 @@ namespace ClientDependency.Core.CompositeFiles
         private readonly static object Lock = new object();
 
         private static DnnConfiguration dnnConfig = new DnnConfiguration();
+
         /// <summary>
         /// When building composite includes, it creates a Base64 encoded string of all of the combined dependency file paths
         /// for a given composite group. If this group contains too many files, then the file path with the query string will be very long.
@@ -33,14 +34,8 @@ namespace ClientDependency.Core.CompositeFiles
             get { return true; }
         }
 
-        void IHttpHandler.ProcessRequest(HttpContext context)
+        private bool ValidateRequest(HttpContext context, out string fileKey, out ClientDependencyType type, out int version)
         {
-            var contextBase = new HttpContextWrapper(context);
-
-            ClientDependencyType type;
-            string fileKey;
-            int version = 0;
-
             if (string.IsNullOrEmpty(context.Request.PathInfo))
             {
                 var decodedUrl = HttpUtility.HtmlDecode(context.Request.Url.OriginalString);
@@ -54,15 +49,26 @@ namespace ClientDependency.Core.CompositeFiles
                 // querystring format
                 fileKey = queryStrings["s"];
                 var clientDepdendencyVersion = queryStrings["cdv"].TrimEnd('/');
-                if (!string.IsNullOrEmpty(clientDepdendencyVersion) && !Int32.TryParse(clientDepdendencyVersion, out version))
-                    throw new ArgumentException("Could not parse the version in the request");
-                try
+                
+                if (!string.IsNullOrEmpty(clientDepdendencyVersion) && int.TryParse(clientDepdendencyVersion, out version))
                 {
-                    type = (ClientDependencyType)Enum.Parse(typeof(ClientDependencyType), queryStrings["t"], true);
+                    try
+                    {
+                        type = (ClientDependencyType)Enum.Parse(typeof(ClientDependencyType), queryStrings["t"], true);
+                        return true;
+                    }
+                    catch
+                    {
+                        type = default(ClientDependencyType);
+                        version = default(int);
+                        return false;
+                    }
                 }
-                catch
+                else
                 {
-                    throw new ArgumentException("Could not parse the type set in the request");
+                    type = default(ClientDependencyType);
+                    version = default(int);
+                    return false;
                 }
             }
             else
@@ -72,26 +78,42 @@ namespace ClientDependency.Core.CompositeFiles
                 var path = context.Request.PathInfo.TrimStart('/');
                 var pathFormat = ClientDependencySettings.Instance.DefaultCompositeFileProcessingProvider.PathBasedUrlFormat;
                 //parse using the parser
-                if (!PathBasedUrlFormatter.Parse(pathFormat, path, out fileKey, out type, out version))
+                if (PathBasedUrlFormatter.Parse(pathFormat, path, out fileKey, out type, out version))
                 {
-                    if (context.IsDebuggingEnabled || dnnConfig.IsDebugMode())
-                    {
-                        throw new FormatException("Could not parse the URL path: " + path + " with the format specified: " + pathFormat);
-                    }
-
-                    throw new HttpException(404, "Path not found");
+                    return true;
+                }
+                else
+                {
+                    ClientDependencySettings.Instance.Logger.Debug($"Could not parse the URL path: {path} with the format specified: {pathFormat}");
+                    return false;
                 }
             }
+        }
+
+        void IHttpHandler.ProcessRequest(HttpContext context)
+        {
+            var contextBase = new HttpContextWrapper(context);
+
+            if (!ValidateRequest(context, out string fileKey, out ClientDependencyType type, out int version))
+            {
+                //end request
+                context.Response.StatusCode = 404;
+                context.Response.End();
+                return;
+                }
 
             fileKey = context.Server.UrlDecode(fileKey);
 
             if (string.IsNullOrEmpty(fileKey))
-                throw new ArgumentException("Must specify a fileset in the request");
+                {
+                //end request
+                context.Response.StatusCode = 404;
+                context.Response.End();
+                return;
+                }
 
-            // don't process if the version doesn't match - this would be nice to do but people will get errors if 
-            // their html pages are cached and are referencing an old version
-            //if (version != ClientDependencySettings.Instance.Version)
-            //    throw new ArgumentException("Configured version does not match request");
+            //regardless of what version is passed in, use the configured version
+            version = ClientDependencySettings.Instance.Version;
 
             byte[] outputBytes = null;
 
@@ -99,7 +121,7 @@ namespace ClientDependency.Core.CompositeFiles
             // the parameters are the same that we are going to use when setting our own custom
             // caching parameters. Unfortunately server side output cache is tied so directly to 
             // webforms this seems to be the only way to to this.
-            var page = new OutputCachedPage(new OutputCacheParameters
+            using (var page = new OutputCachedPage(new OutputCacheParameters
             {
                 Duration = Convert.ToInt32(TimeSpan.FromDays(10).TotalSeconds),
                 Enabled = true,
@@ -107,13 +129,22 @@ namespace ClientDependency.Core.CompositeFiles
                 VaryByContentEncoding = "gzip;deflate",
                 VaryByHeader = "Accept-Encoding",
                 Location = OutputCacheLocation.Any
-            });
-
+            }))
+            {
             //retry up to 5 times... this is only here due to a bug found in another website that was returning a blank 
             //result. To date, it can't be replicated in VS, but we'll leave it here for error handling support... can't hurt
             for (int i = 0; i < 5; i++)
             {
-                outputBytes = ProcessRequestInternal(contextBase, fileKey, type, version, outputBytes, page);
+                    outputBytes = ProcessRequestInternal(contextBase, fileKey, type, version, outputBytes, page, out var success);
+                    
+                    if (!success)
+                    {
+                        //end request
+                        context.Response.StatusCode = 404;
+                        context.Response.End();
+                        return;
+                    }
+                    
                 if (outputBytes != null && outputBytes.Length > 0)
                     break;
 
@@ -123,18 +154,18 @@ namespace ClientDependency.Core.CompositeFiles
             if (outputBytes == null || outputBytes.Length == 0)
             {
                 ClientDependencySettings.Instance.Logger.Fatal(string.Format("No bytes were returned after 5 attempts. Fileset: {0}, Type: {1}, Version: {2}", fileKey, type, version), null);
-                List<CompositeFileDefinition> fDefs;
-                outputBytes = GetCombinedFiles(contextBase, fileKey, type, out fDefs);
+                    //end request
+                    context.Response.StatusCode = 404;
+                    context.Response.End();
+                    return;
             }
 
             context.Response.ContentType = type == ClientDependencyType.Javascript ? "application/x-javascript" : "text/css";
             context.Response.OutputStream.Write(outputBytes, 0, outputBytes.Length);
-
-            //dispose the webforms page used to do ensure server side output cache
-            page.Dispose();
+        }
         }
 
-        internal byte[] ProcessRequestInternal(HttpContextBase context, string fileset, ClientDependencyType type, int version, byte[] outputBytes, OutputCachedPage page)
+        private byte[] ProcessRequestInternal(HttpContextBase context, string fileset, ClientDependencyType type, int version, byte[] outputBytes, OutputCachedPage page, out bool success)
         {
             //get the compression type supported
             var clientCompression = context.GetClientCompression();
@@ -174,13 +205,9 @@ namespace ClientDependency.Core.CompositeFiles
 
                             if (filePaths == null)
                             {
-                                if (context.IsDebuggingEnabled || dnnConfig.IsDebugMode())
-                                {
-                                    throw new KeyNotFoundException("no map was found for the dependency key: " + fileset +
-                                                               " ,CompositeUrlType.MappedId requires that a map is found");
-                                }
-
-                                throw new HttpException(404, "Path not found");
+                                success = false;
+                                ClientDependencySettings.Instance.Logger.Error("no map was found for the dependency key: " + fileset + " ,CompositeUrlType.MappedId requires that a map is found", null);
+                                return null;
                             }
 
                             var filePathArray = filePaths.ToArray();
@@ -194,6 +221,13 @@ namespace ClientDependency.Core.CompositeFiles
                         {
                             //need to do the combining, etc... and save the file map                            
                             fileBytes = GetCombinedFiles(context, fileset, type, out fileDefinitions);
+                        }
+
+                        if (fileDefinitions.Count == 0)
+                        {
+                            //nothing was processed
+                            success = false;
+                            return null;
                         }
 
                         //compress data                        
@@ -212,10 +246,14 @@ namespace ClientDependency.Core.CompositeFiles
                             {
                                 //Update the XML file map
                                 ClientDependencySettings.Instance.DefaultFileMapProvider.CreateUpdateMap(fileset, clientCompression.ToString(),
+
+#if !Net35
                                     fileDefinitions.Select(x => new BasicFile(type) { FilePath = x.Uri }),
+#else
+                                fileDefinitions.Select(x => (IClientDependencyFile)new BasicFile(type) { FilePath = x.Uri }),
+#endif
                                         compositeFileName,
-                                        //TODO: We should probably use the passed in version param?
-                                        ClientDependencySettings.Instance.Version);
+                                        version);
                             }
                         }
                     }
@@ -225,6 +263,7 @@ namespace ClientDependency.Core.CompositeFiles
             //set our caching params 
             SetCaching(context, compositeFileName, fileset, clientCompression, page);
 
+            success = true;
             return outputBytes;
         }
 
@@ -258,7 +297,9 @@ namespace ClientDependency.Core.CompositeFiles
         private byte[] GetCombinedFiles(HttpContextBase context, string fileset, ClientDependencyType type, out List<CompositeFileDefinition> fDefs)
         {
             //get the file list
-            string[] filePaths = fileset.DecodeFrom64Url().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] filePaths = fileset.DecodeFrom64Url().Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .ToArray();
             // sanity check/fix for file type
             type = ValidateTypeFromFileNames(context, type, filePaths);
             //combine files and get the definition types of them (internal vs external resources)

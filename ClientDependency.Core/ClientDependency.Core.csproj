@@ -79,6 +79,16 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release-Net35|AnyCPU'">
+    <OutputPath>bin\Release-Net35\</OutputPath>
+    <DefineConstants>TRACE;MVC;Net35</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
@@ -108,7 +118,6 @@
     <Compile Include="BundleDefinition.cs" />
     <Compile Include="BundleManager.cs" />
     <Compile Include="BundleResult.cs" />
-    <Compile Include="ClientDependencyResourceHandler.cs" />
     <Compile Include="CompositeFiles\CSSMin.cs" />
     <Compile Include="CompositeFiles\CssMinifier.cs" />
     <Compile Include="CompositeFiles\IVirtualFile.cs" />
@@ -187,6 +196,7 @@
     <Compile Include="Module\RogueFileFilter.cs" />
     <Compile Include="NetworkHelper.cs" />
     <Compile Include="ObjectExtensions.cs" />
+    <Compile Include="PathHelper.cs" />
     <Compile Include="PathsCollection.cs" />
     <Compile Include="PlaceholderParser.cs" />
     <Compile Include="PlaceholderReplacementEventArgs.cs" />
@@ -234,7 +244,6 @@
     <None Include="cdf.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
