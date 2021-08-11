@@ -35,7 +35,8 @@ namespace ClientDependency.Core.Config
             ConfigSection = GetDefaultSection();
             //default
             CompositeFileHandlerPath = "~/DependencyHandler.axd";
-
+            OutputCacheDays = 10;
+            HtmlCompatibility = "html4";
             _loadProviders = () =>
                 LoadProviders(new HttpContextWrapper(HttpContext.Current));
 
@@ -203,6 +204,8 @@ namespace ClientDependency.Core.Config
 
         public ILogger Logger { get; private set; }
 
+        public int OutputCacheDays { get; set; }
+
         /// <summary>
         /// Returns the default MVC renderer
         /// </summary>
@@ -244,6 +247,8 @@ namespace ClientDependency.Core.Config
         public FileMapProviderCollection FileMapProviderCollection { get; private set; }
 
         public string CompositeFileHandlerPath { get; set; }
+        
+        public string HtmlCompatibility { get; set; }
 
         internal void LoadProviders(HttpContextBase http)
         {
@@ -262,7 +267,8 @@ namespace ClientDependency.Core.Config
             CompositeFileHandlerPath = path.StartsWith("~/")
                 ? VirtualPathUtility.ToAbsolute(ConfigSection.CompositeFileElement.CompositeFileHandlerPath, rootPath)
                 : ConfigSection.CompositeFileElement.CompositeFileHandlerPath;
-
+            OutputCacheDays = ConfigSection.CompositeFileElement.OutputCacheDays;
+            HtmlCompatibility = ConfigSection.HtmlCompatibility;
             FileRegistrationProviderCollection = new FileRegistrationProviderCollection();
             CompositeFileProcessingProviderCollection = new CompositeFileProcessingProviderCollection();
             MvcRendererCollection = new RendererCollection();

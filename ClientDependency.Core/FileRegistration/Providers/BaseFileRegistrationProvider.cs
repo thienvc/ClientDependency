@@ -13,6 +13,7 @@ using ClientDependency.Core.Controls;
 using ClientDependency.Core.Config;
 using ClientDependency.Core;
 using ClientDependency.Core.CompositeFiles;
+using System.Configuration;
 
 namespace ClientDependency.Core.FileRegistration.Providers
 {
@@ -143,7 +144,7 @@ namespace ClientDependency.Core.FileRegistration.Providers
             if (config != null && config["enableDebugVersionQueryString"] != null && !string.IsNullOrEmpty(config["enableDebugVersionQueryString"]))
             {
                 bool enableDebugVersionQueryString;
-                if (bool.TryParse(config["disableCompositeBundling"], out enableDebugVersionQueryString))
+                if (bool.TryParse(config["enableDebugVersionQueryString"], out enableDebugVersionQueryString))
                 {
                     EnableDebugVersionQueryString = enableDebugVersionQueryString;
                 }
@@ -423,7 +424,7 @@ namespace ClientDependency.Core.FileRegistration.Providers
             switch(file.DependencyType)
             {
                 case ClientDependencyType.Javascript:
-                    if (!attributes.ContainsKey("type"))
+                    if (!attributes.ContainsKey("type") && ClientDependencySettings.Instance.HtmlCompatibility == "html4")
                         attributes.Add("type", "text/javascript");
                     if (attributes.ContainsKey("src"))
                         attributes.Remove("src");
