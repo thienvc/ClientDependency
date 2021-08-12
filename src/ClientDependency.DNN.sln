@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31410.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{09017A90-7F59-40F8-8121-8B4284697BBD}"
 	ProjectSection(SolutionItems) = preProject
@@ -65,8 +65,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TypeScript", "TypeScript", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientDependency.Core", "ClientDependency.Core\ClientDependency.Core.csproj", "{EA35B06D-0CC8-4830-A3F7-9BB3D36D0FAF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco4.ClientDependency", "Umbraco4.ClientDependency\Umbraco4.ClientDependency.csproj", "{08DFBA02-97A5-496C-9272-09CE98C50BF5}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,16 +87,6 @@ Global
 		{EA35B06D-0CC8-4830-A3F7-9BB3D36D0FAF}.Release-MVC5|Any CPU.Build.0 = Release-Net45|Any CPU
 		{EA35B06D-0CC8-4830-A3F7-9BB3D36D0FAF}.Release-Net45|Any CPU.ActiveCfg = Release-Net45|Any CPU
 		{EA35B06D-0CC8-4830-A3F7-9BB3D36D0FAF}.Release-Net45|Any CPU.Build.0 = Release-Net45|Any CPU
-		{08DFBA02-97A5-496C-9272-09CE98C50BF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{08DFBA02-97A5-496C-9272-09CE98C50BF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{08DFBA02-97A5-496C-9272-09CE98C50BF5}.Debug-MVC5|Any CPU.ActiveCfg = Debug|Any CPU
-		{08DFBA02-97A5-496C-9272-09CE98C50BF5}.Debug-Net45|Any CPU.ActiveCfg = Debug|Any CPU
-		{08DFBA02-97A5-496C-9272-09CE98C50BF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{08DFBA02-97A5-496C-9272-09CE98C50BF5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{08DFBA02-97A5-496C-9272-09CE98C50BF5}.Release-MVC5|Any CPU.ActiveCfg = Release|Any CPU
-		{08DFBA02-97A5-496C-9272-09CE98C50BF5}.Release-MVC5|Any CPU.Build.0 = Release|Any CPU
-		{08DFBA02-97A5-496C-9272-09CE98C50BF5}.Release-Net45|Any CPU.ActiveCfg = Release|Any CPU
-		{08DFBA02-97A5-496C-9272-09CE98C50BF5}.Release-Net45|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

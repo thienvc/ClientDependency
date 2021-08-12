@@ -22,10 +22,6 @@
     </dependencies>
   </metadata>
   <files>
-
-    <file src="net40\*.dll" target="lib\net40" />
-    <file src="net40\*.pdb" target="lib\net40" />
-
     <file src="net45\*.dll" target="lib\net45" />
     <file src="net45\*.pdb" target="lib\net45" />
 
