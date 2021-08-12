@@ -26,5 +26,5 @@ steps:
   inputs:
     filePath: './Build-Release.ps1'
     
-- publish: 'build/Release/Dnn.ClientDependency*.nupkg'
+- publish: 'build/Release'
   continueOnError: true
