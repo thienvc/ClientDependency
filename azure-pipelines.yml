@@ -25,3 +25,6 @@ steps:
 - task: PowerShell@2
   inputs:
     filePath: './Build-Release.ps1'
+    
+- publish: 'build/Release'
+  continueOnError: true
