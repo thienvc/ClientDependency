@@ -1,16 +1,17 @@
+version: 1.9.10.{build}
+skip_non_tags: true
+image: Visual Studio 2019
 pull_requests:
   do_not_increment_build_number: true
 branches:
   only:
   - dnn
-image: Visual Studio 2017
 nuget:
   project_feed: true
   disable_publish_on_pr: true
-version: 1.9.2.{build}
 
 environment:
-  ProductVersion: 1.9.2
+  ProductVersion: 1.9.10
   
 before_build:
 - ps: Update-AppveyorBuild -Version "$env:ProductVersion.$env:APPVEYOR_BUILD_NUMBER-$env:APPVEYOR_JOB_ID"
@@ -19,3 +20,6 @@ build_script:
 - ps: .\Build-Release.ps1 $env:BuildVersion ''
 after_build:
 - ps: Push-AppveyorArtifact build\Releases\v$env:BuildVersion\Dnn.ClientDependency.$env:BuildVersion.nupkg
+artifacts:
+- path: build\Release\*.nupkg
+  name: Nuget Package
