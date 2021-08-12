@@ -61,3 +61,6 @@ Shows information about all CDF releases
 &copy; 2018 by Shannon Deminick
 
 This is free software and is licensed under the [Microsoft Public License (Ms-PL)](http://opensource.org/licenses/MS-PL)
+
+## Build/Release process
+To build the DNN specific library, run `./Build-Release.ps1` in powershell. The default configuration will use the version from the most recent git tag only if a specific version is not provided manually to the script.

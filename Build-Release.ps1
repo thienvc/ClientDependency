@@ -1,9 +1,9 @@
 param (
-	[Parameter(Mandatory=$true)]
+	[Parameter(Mandatory=$false)]
 	[ValidatePattern("^\d+\.\d+\.(?:\d+\.\d+$|\d+$)")]
 	[string]
 	$ReleaseVersionNumber,
-	[Parameter(Mandatory=$true)]
+	[Parameter(Mandatory=$false)]
 	[string]
 	[AllowEmptyString()]
 	$PreReleaseName,
@@ -11,6 +11,11 @@ param (
 	[int]
 	$IsBuildServer = 0
 )
+
+if ([string]::IsNullOrEmpty($ReleaseVersionNumber)) {
+	$tags = git tag --sort=-creatordate
+	$ReleaseVersionNumber = $tags[0].Substring(1);
+}
 
 $PSScriptFilePath = (Get-Item $MyInvocation.MyCommand.Path).FullName
 $RepoRoot = (get-item $PSScriptFilePath).Directory.FullName;
