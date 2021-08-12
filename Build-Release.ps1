@@ -76,7 +76,7 @@ $SolutionInfoPath = Join-Path -Path $SolutionRoot -ChildPath "SolutionInfo.cs"
 $SolutionPath = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.dnn.sln"
 
 # clean sln for all deploys
-& $MSBuild "$SolutionPath" /p:Configuration=Release-Net35 /maxcpucount /t:Clean
+& $MSBuild "$SolutionPath" /p:Configuration=Release-Net45 /maxcpucount /t:Clean
 if (-not $?)
 {
 	throw "The MSBuild process returned an error code."
@@ -104,7 +104,7 @@ Write-Host "Restoring nuget packages..."
 #build for all deploys
 
 # for net 3.5
-& $MSBuild "$SolutionPath" /p:Configuration=Release-Net35 /maxcpucount
+& $MSBuild "$SolutionPath" /p:Configuration=Release-Net45 /maxcpucount
 if (-not $?)
 {
 	throw "The MSBuild process returned an error code."
@@ -147,28 +147,17 @@ New-Item $TypeScriptFolder -Type directory
 
 $include = @('ClientDependency.Core.dll','ClientDependency.Core.pdb')
 # Need to build to specific .Net version folders
-$CoreBinFolderNet35 = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.Core\bin\Release-Net35";
-$CoreBinFolderNet40 = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.Core\bin\Release";
 $CoreBinFolderNet45 = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.Core\bin\Release-Net45";
-$CoreFolderNet35 = Join-Path -Path $CoreFolder -ChildPath "net35";
-$CoreFolderNet40 = Join-Path -Path $CoreFolder -ChildPath "net40";
 $CoreFolderNet45 = Join-Path -Path $CoreFolder -ChildPath "net45";
-New-Item $CoreFolderNet35 -Type directory
-New-Item $CoreFolderNet40 -Type directory
+
 New-Item $CoreFolderNet45 -Type directory
-Copy-Item "$CoreBinFolderNet35\*.*" -Destination $CoreFolderNet35 -Include $include
-Copy-Item "$CoreBinFolderNet40\*.*" -Destination $CoreFolderNet40 -Include $include
 Copy-Item "$CoreBinFolderNet45\*.*" -Destination $CoreFolderNet45 -Include $include
 
 $include = @('ClientDependency.Core.Mvc.dll','ClientDependency.Core.Mvc.pdb')
 # Need to build to specific .Net version folders
-$MvcBinFolderNet40 = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.Mvc\bin\Release";
 $MvcBinFolderNet45 = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.Mvc\bin\Release-Net45";
-$MvcFolderNet40 = Join-Path -Path $MvcFolder -ChildPath "net40";
 $MvcFolderNet45 = Join-Path -Path $MvcFolder -ChildPath "net45";
-New-Item $MvcFolderNet40 -Type directory
 New-Item $MvcFolderNet45 -Type directory
-#Copy-Item "$MvcBinFolderNet40\*.*" -Destination $MvcFolderNet40 -Include $include
 #Copy-Item "$MvcBinFolderNet45\*.*" -Destination $MvcFolderNet45 -Include $include
 #need to build mvc5 separately
 $Mvc5BinFolderNet45 = Join-Path -Path $SolutionRoot -ChildPath "ClientDependency.Mvc\bin\Release-MVC5";
