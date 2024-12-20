@@ -9,12 +9,13 @@ namespace ClientDependency.Core
 
         /// <summary>
         /// Returns the dictionary as formatted html attributes for use in an html tag
+        /// ThienVo: Fix html attribute without value
         /// </summary>
         /// <param name="d"></param>
         /// <returns></returns>
         public static string ToHtmlAttributes(this IDictionary<string, string> d)
         {
-            return string.Join(" ", d.Select(x => x.Key + "=\"" + x.Value + "\"").ToArray());
+            return string.Join(" ", d.Select(x => x.Key + (string.IsNullOrEmpty(x.Value) || x.Key == x.Value ? "" : "=\"" + x.Value + "\"")).ToArray());
         }
 
         /// <summary>

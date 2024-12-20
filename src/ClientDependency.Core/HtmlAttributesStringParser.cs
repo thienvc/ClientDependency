@@ -17,23 +17,50 @@ namespace ClientDependency.Core
             var isKey = true;
             var isVal = false;
             var isValDelimited = false;
-            for (var i = 0; i < attributes.Length; i++)
+            var arrChars = attributes.ToCharArray();
+            var cLength = arrChars.Length;
+            var hasKeyDelim = false;
+            for (var i = 0; i < cLength; i++)
             {
-                var c = attributes.ToCharArray()[i];
-                if (isKey && c == ':')
+                var c = arrChars[i];
+                if (isKey && (c == ':' || c == ','))
                 {
                     isKey = false;
                     isVal = true;
+                    hasKeyDelim = c == ',';
                     continue;
                 }
 
                 if (isKey)
                 {
                     key += c;
+
+                    // key without value
+                    if (i == cLength - 1)
+                    {
+                        isKey = false;
+                        isVal = true;
+                        destination[key.Trim()] = null;
+                        key = "";
+                        val = "";
+                        continue;
+                    }
                 }
 
                 if (isVal)
                 {
+                    // key without value
+                    if (hasKeyDelim)
+                    {
+                        hasKeyDelim = false;
+                        isKey = true;
+                        isVal = false;
+                        destination[key.Trim()] = null;
+                        key = "";
+                        val = "";
+                        continue;
+                    }
+
                     if (c == '\'')
                     {
                         if (!isValDelimited)
@@ -44,10 +71,10 @@ namespace ClientDependency.Core
                         else
                         {
                             isValDelimited = false;
-                            if ((i == attributes.Length - 1))
+                            if ((i == cLength - 1))
                             {
                                 //if it the end, add/replace the value
-                                destination[key] = val;                                
+                                destination[key.Trim()] = val;                                
                             }
                             continue;
                         }
@@ -60,7 +87,7 @@ namespace ClientDependency.Core
                         isVal = false;
 
                         //now we can add/replace the current value to the dictionary
-                        destination[key] = val;
+                        destination[key.Trim()] = val;
                         key = "";
                         val = "";
                         continue;
